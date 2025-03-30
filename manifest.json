@@ -1,0 +1,11 @@
+{
+    "name": "SetSeed",
+    "version_number": "0.0.1",
+    "website_url": "https://github.com/FrozenBreadstick/RoRR_SetSeed",
+    "description": "A mod to set a seed for your run so that you can speedrun against friends or just find interesting seeds.",
+    "dependencies": [
+        "ReturnOfModding-ReturnOfModding-1.0.56",
+        "RoRRModdingToolkit-RoRR_Modding_Toolkit-1.2.8",
+        "MGReturns-ENVY-1.1.1"
+    ]
+}
