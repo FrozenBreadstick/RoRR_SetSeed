@@ -9,9 +9,9 @@
 - Stage Variant
 - Chest/Shop/Shrine Spawns
 - Boss Spawn
+- First Stage
 
 ## Not Seeded Successfully yet:
-- First Stage
 - Enemies Dropping Items
 
 ## Things not planned to be seeded:
