@@ -1,2 +1,2 @@
-### v1.0.0
-* Initial release
+### v0.6.9
+* Initial release, basic functionality, see README
