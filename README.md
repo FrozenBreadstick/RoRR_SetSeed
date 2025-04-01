@@ -20,7 +20,7 @@
 
 # To Do:
 - Fix shrines. Either do not work and give no items or work without fail but give two items of the same rarity in a row (Drone scrappers too)
-- Bosses killed need to multiply or add by number of bosses killed this stage so that each boss drops a different item.
+- ~~Bosses killed need to multiply or add by number of bosses killed this stage so that each boss drops a different item.~~ (I think fixed but testing)
 - Naturally spawned boss enemy and scavs are unseeded
 - Drifter is unseeded
 
