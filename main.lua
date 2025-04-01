@@ -100,6 +100,7 @@ gm.pre_script_hook(gm.constants.treasure_loot_pool_roll, function(self,other,res
     print("loot_rolled")
     Helper.log_hook(self, other, result, args)
     local tp = gm.instance_find(gm.constants.pTeleporter, 0)
+    -- if actor is oDrifter increment a counter for how many items has been got and then multiply by that value using it in a random seed math function
     if gm.actor_is_boss(self) then
         gm.random_set_seed(seed * tp.x + tp.y)
     else
