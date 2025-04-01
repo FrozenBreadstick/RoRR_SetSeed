@@ -7,6 +7,7 @@ mods["RoRRModdingToolkit-RoRR_Modding_Toolkit"].auto()
 PATH = _ENV["!plugins_mod_folder_path"]
 
 local seed = 1 --EDIT TO SEED YOU WANT UNTIL MENU IS IMPLEMENTED
+local enabled = false --Enables or disables mod
 
 --gm.variable_global_set("game_seed", seed)
 
