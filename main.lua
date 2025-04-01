@@ -7,7 +7,16 @@ mods["RoRRModdingToolkit-RoRR_Modding_Toolkit"].auto()
 PATH = _ENV["!plugins_mod_folder_path"]
 
 local seed = 1 --EDIT TO SEED YOU WANT UNTIL MENU IS IMPLEMENTED
+
+local seed_input = 0
 local enabled = false --Enables or disables mod
+
+local alarm_times_called = 1
+local other_times_called = 1
+local card_times_called = 1
+local elite_times_called = 1
+
+local bosses_murdered_this_stage = 0
 
 --gm.variable_global_set("game_seed", seed)
 
@@ -23,118 +32,194 @@ Initialize(initialize)
 -- if hotload then initialize() end
 -- hotload = true
 
+-- UI STUFF #######################################################
+gui.add_imgui(function()
+    if ImGui.Begin("SetSeed") then
+        seed_input, changed = ImGui.InputInt("Seed Value", seed_input)
+
+        if ImGui.Button("Submit") then
+            seed = seed_input
+            log.info("Seed set to: " .. seed)
+        end
+
+        enabled, _ = ImGui.Checkbox("Seeding Enabled?", enabled) --????
+
+    end
+    ImGui.End()
+end)
+-- ################################################################
+
+
 gm.pre_script_hook(gm.constants.rng_create, function(self, other, result, args)
     print("rng_create")
-    gm.random_set_seed(seed)
+    if(enabled) then 
+        gm.random_set_seed(seed)
+    end
 end)
 
 gm.pre_script_hook(gm.constants.treasure_boss_roll, function(self, other, result, args)
     print("treasure_boss_roll")
-    local tp = gm.instance_find(gm.constants.pTeleporter, 0)
-    gm.random_set_seed(seed * tp.x + tp.y)
+    if(enabled) then 
+        local tp = gm.instance_find(gm.constants.pTeleporter, 0)
+        gm.random_set_seed(seed * tp.x + tp.y)
+    end
 end)
 
 gm.pre_script_hook(gm.constants.item_equipment_enigma_reroll, function(self, other, result, args)
     print("enigma_reroll")
-    gm.random_set_seed(seed)
+    if(enabled) then 
+        gm.random_set_seed(seed)
+    end
 end)
 
 gm.pre_script_hook(gm.constants.stage_roll_next, function(self, other, result, args)
     print("stage_roll")
-    gm.random_set_seed(seed)
+    if(enabled) then 
+        gm.random_set_seed(seed)
+        bosses_murdered_this_stage = 0
+    end
 end)
 
 gm.pre_script_hook(gm.constants.pickup_roll, function(self, other, result, args)
     print("pickup_roll")
-    gm.random_set_seed(seed)
+    if(enabled) then 
+        gm.random_set_seed(seed) 
+    end
 end)
 
 gm.pre_script_hook(gm.constants.director_select_elite_type, function(self, other, result, args)
     print("select_elite_type")
-    gm.random_set_seed(seed)
+    if(enabled) then 
+        gm.random_set_seed(seed + elite_times_called)
+        elite_times_called = elite_times_called + 1
+    end
 end)
 
 gm.pre_script_hook(gm.constants.mapobject_spawn, function(self, other, result, args)
     print("spawn_mapobject")
-    gm.random_set_seed(seed)
+    if(enabled) then 
+        gm.random_set_seed(seed)
+    end
 end)
 
 gm.pre_script_hook(gm.constants.director_spawn_monster_card, function(self, other, result, args)
     print("spawn_monster")
-    gm.random_set_seed(seed)
+    if(enabled) then 
+        gm.random_set_seed(seed + card_times_called)
+        card_times_called = card_times_called + 1
+    end
 end)
 
 gm.pre_script_hook(gm.constants.director_do_boss_spawn, function(self, other, result, args)
     print("do_boss_spawn")
-    gm.random_set_seed(seed)
+    if(enabled) then 
+        gm.random_set_seed(seed)
+    end
 end)
 
 gm.pre_script_hook(gm.constants.item_drop, function(self, other, result, args)
     print("item_drop")
-    if self.x then
-        gm.random_set_seed(seed * self.x + self.y)
-    else
-        gm.random_set_seed(seed)
+    if(enabled) then 
+        if self.x then
+            gm.random_set_seed(seed * self.x + self.y)
+        else
+            gm.random_set_seed(seed)
+        end
     end
 end)
 
 gm.pre_script_hook(gm.constants.drop_gold_and_exp, function(self, other, result, args)
     print("gold_and_exp")
-    if self.x then
-        gm.random_set_seed(seed * self.x + self.y)
-    else
-        gm.random_set_seed(seed)
+    if(enabled) then 
+        if self.x then
+            gm.random_set_seed(seed * self.x + self.y)
+        else
+            gm.random_set_seed(seed)
+        end
     end
 end)
 
 gm.post_script_hook(gm.constants.rng_random_seed, function(self, other, result, args)
     print("random_seed")
-    if self.x then
-        gm.random_set_seed(seed * self.x + self.y)
-    else
-        gm.random_set_seed(seed)
+    if(enabled) then 
+        if self.x then
+            gm.random_set_seed(seed * self.x + self.y)
+        else
+            gm.random_set_seed(seed)
+        end
     end
 end)
 
 gm.pre_script_hook(gm.constants.treasure_loot_pool_roll, function(self,other,result,args)
     print("loot_rolled")
-    Helper.log_hook(self, other, result, args)
-    local tp = gm.instance_find(gm.constants.pTeleporter, 0)
-    -- if actor is oDrifter increment a counter for how many items has been got and then multiply by that value using it in a random seed math function
-    if gm.actor_is_boss(self) then
-        gm.random_set_seed(seed * tp.x + tp.y)
-    else
-        if self.cost then
-            gm.random_set_seed(seed * self.x + self.y * self.cost)
+    if(enabled) then 
+        Helper.log_hook(self, other, result, args)
+        local tp = gm.instance_find(gm.constants.pTeleporter, 0)
+        -- if actor is oDrifter increment a counter for how many items has been got and then multiply by that value using it in a random seed math function
+        if gm.actor_is_boss(self) then
+            gm.random_set_seed(seed * tp.x + tp.y)
+            bosses_murdered_this_stage = bosses_murdered_this_stage + 1
         else
-        gm.random_set_seed(seed * self.x + self.y)
+            if self.cost then
+                gm.random_set_seed(seed * self.x + self.y * self.cost)
+            else
+            gm.random_set_seed(seed * self.x + self.y)
+            end
         end
     end
-
 end)
 
 gm.pre_script_hook(gm.constants.interactable_set_active, function(self,other,result,args)
     print("interactable_set_active")
-    if self.cost then
-        gm.random_set_seed(seed * self.x + self.y * self.cost)
-    else
-        gm.random_set_seed(seed * self.x + self.y)
+    if(enabled) then 
+        if self.cost then
+            gm.random_set_seed(seed * self.x + self.y * self.cost)
+        else
+            gm.random_set_seed(seed * self.x + self.y)
+        end
     end
 end)
 
 gm.pre_script_hook(gm.constants.treasure_weights_roll_pickup, function(self, other, result, args)
     print("weight_roll_pickup")
-    gm.random_set_seed(seed)
+    if(enabled) then 
+        gm.random_set_seed(seed)
+    end
 end)
 
 gm.pre_script_hook(gm.constants.treasure_boss_clear, function(self, other, result, args)
     print("boss_clear_treasure")
-    local tp = gm.instance_find(gm.constants.pTeleporter, 0)
-    gm.random_set_seed(seed * tp.x + tp.y)
+    if(enabled) then 
+        local tp = gm.instance_find(gm.constants.pTeleporter, 0)
+        gm.random_set_seed(seed * tp.x + tp.y)
+    end
+end)
+
+gm.pre_code_execute("gml_Object_oDirectorControl_Other_4", function (self)
+    print("alarm_1")
+    if(enabled) then 
+        gm.random_set_seed(seed * alarm_times_called)
+        alarm_times_called = alarm_times_called + 1
+    end
+end)
+
+gm.pre_code_execute("gml_Object_oDirectorControl_Other_4", function (self)
+    print("alarm_1")
+    if(enabled) then 
+        gm.random_set_seed(seed * other_times_called)
+        other_times_called = other_times_called + 1
+    end
 end)
 
 Callback.add(Callback.TYPE.onGameStart, "SetStartingSeed", function()
-    gm.varialbe_global_set("game_seed", seed)
+    if(enabled) then 
+        gm.varialbe_global_set("game_seed", seed)
+        alarm_times_called = 1
+        other_times_called = 1
+        card_times_called = 1
+        elite_times_called = 1       
+        bosses_murdered_this_stage = 0
+    end
 end)
 
 -- gm.post_script_hook(gm.constants.__input_system_tick, function(self, other, result, args)
